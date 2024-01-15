@@ -35,6 +35,23 @@ function createRenderer(options) {
     }
   }
 
+  function patchElement(n1, n2) {
+    const el = n2.el = n1.el
+    const oldProps = n1.props
+    const newProps = n2.props
+    for (const key in newProps) {
+      if (newProps[key] !== oldProps[key]) {
+        patchProps(el, key, oldProps[key], newProps)
+      }
+    }
+    for (const key in oldProps) {
+      if (!(key in newProps)) {
+        patchProps(el, key, oldProps[key], null)
+      }
+    }
+    patchChildren(n1, n2, el)
+  }
+
   function shouldSetAsProps(el, key, value) {
     if (key === 'form' && el.tagName === 'INPUT')
       return false
