@@ -9,6 +9,7 @@ function createRenderer(options) {
         unmount(container._vnode)
       }
     }
+    // 将vnode缓存作为下次 打补丁时的旧vnode
     container._vnode = vnode
   }
 
@@ -26,7 +27,8 @@ function createRenderer(options) {
       if (!oldVNode) {
         mountElement(newVNode, container)
       } else {
-        // patchElement(n1, n2)
+        // 旧的虚拟节点存在，代表的是更新打补丁
+        patchElement(oldVNode, newVNode)
       }
     } else if (typeof type === 'object') {
       // newVnode.type的值是对象，则它描述的是组件

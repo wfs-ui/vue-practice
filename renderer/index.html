@@ -38,25 +38,35 @@
     insert(el, parent, anchor = null) {
       parent.insertBefore(el, anchor)
     },
+    // prevValue 之前的属性值，nextValue现在的
     patchProps(el, key, prevValue, nextValue) {
       if (/^on/.test(key)) {
+        // 添加事件绑定相关逻辑
         // vei => vueEventInvoker
-        const invokers = el._vei || (el._vei = {})
-        let invoker = invokers[key]
+        const invokers = el._vei || (el._vei = {})  // {}
+        // invoker只是一个临时变量 el._vei是将vueEventInvoker缓存
+        let invoker = invokers[key] // 取出对象中的属性
         // 监听事件名称
         const name = key.slice(2).toLowerCase()
         if (nextValue) {
           if (!invoker) {
+            // 如果没有invoker 则构建
             invoker = el._vei[key] = (e) => {
+              // e.timeStamp 是事件的发生时间
+              if (e.timeStamp < invoker.attached) return
               if (Array.isArray(invoker.value)) {
                 invoker.value.forEach(fn => fn(e))
               } else {
                 invoker.value(e)
               }
             }
+            // 此处的nextValue 就是 vnode.props['onClick'] = Array<Function> || Function
             invoker.value = nextValue
+            // 事件处理函数对象上添加 attached属性
+            invoker.attached = performance.now()
             el.addEventListener(name, invoker)
           } else {
+            // 引用类型修改数据
             invoker.value = nextValue
           }
         } else {
